@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZENOX EXECUTOR - TỐI ƯU HÓA</title>
+  <style>
+    /* NHẬP FONT */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ĐOẠN CSS TỐI ƯU CHO NỀN ĐEN + SAO + NEON NHẸ */
+    html, body {
+      font-family: 'Rajdhani', sans-serif;
+      background: #0a0a0a; /* Nền đen rất tối */
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      color: #fff;
+      overflow-x: hidden;
+      position: relative;
+      padding: 40px 0;
+    }
+
+    /* Canvas nền chiếm toàn màn hình */
+    #galaxy{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      z-index:0; 
+      /* Tối ưu hóa Canvas */
+      transform: translateZ(0);
+      will-change: transform, opacity;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.02); opacity: 0.95; } /* Giảm độ mạnh của hiệu ứng pulse */
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 5em;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+      background: linear-gradient(45deg, #00ff88, #0080ff, #ff0080);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 15px rgba(0, 255, 136, 0.3); 
+
+      /* TỐI ƯU HÓA GPU */
+      will-change: transform, opacity, text-shadow; 
+      transform: translateZ(0); 
+    }
+    
+    .section {
+      width: 90%;
+      max-width: 1200px;
+      /* GIẢM BLUR VÀ OPACITY để cân bằng hiệu suất */
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 20px;
+      padding: 30px;
+      margin: 20px 0;
+      backdrop-filter: blur(5px); /* Giảm từ 10px xuống 5px */
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      position: relative;
+      z-index: 1;
+      
+      /* TỐI ƯU HÓA GPU */
+      transform: translateZ(0); 
+      will-change: transform, backdrop-filter, box-shadow;
+    }
+
+    .section-title {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      font-weight: bold;
+      text-shadow: 0 0 8px #ffffff;
+    }
+
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    .executor-card {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.3); /* Giảm độ mạnh box-shadow */
+      text-align: center;
+      width: 280px;
+      position: relative;
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      backdrop-filter: blur(5px);
+      
+      /* TỐI ƯU HÓA GPU */
+      transform: translateZ(0); 
+      will-change: transform, backdrop-filter, box-shadow;
+    }
+
+    .executor-card .status-label {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #00ff88;
+      color: #0a0a0a;
+      font-weight: 700;
+      font-size: 0.9em;
+      padding: 3px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      user-select: none;
+      box-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+    }
+
+    .executor-card img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .executor-card a.button {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #00ff88;
+      color: #0a0a0a;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1em;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+      transition: transform 0.3s;
+      border: none;
+      cursor: pointer;
+      /* TỐI ƯU HÓA GPU */
+      will-change: transform;
+    }
+
+    .executor-card a.button:hover {
+      transform: scale(1.05);
+    }
+
+    .info-text {
+      font-size: 1.2em;
+      margin: 10px 0 20px;
+      font-weight: 700;
+      text-shadow: 0 0 5px #fff;
+    }
+
+    .footer-text {
+      margin-top: 40px;
+      font-size: 1.2em;
+      color: #ffffff;
+      text-shadow: 0 0 10px #ffffff55;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      /* TỐI ƯU HÓA GPU */
+      transform: translateZ(0);
+    }
+
+    .animated-line {
+      width: 200px;
+      height: 4px;
+      background: #00ff88;
+      box-shadow: 0 0 12px #00ff88, 0 0 24px #00ff88;
+      animation: pulseLine 1.5s ease-in-out infinite;
+      margin-bottom: 20px;
+      border-radius: 2px;
+      position: relative;
+      z-index: 1;
+      /* TỐI ƯU HÓA GPU */
+      transform: translateZ(0);
+      will-change: transform, box-shadow, opacity;
+    }
+
+    @keyframes pulseLine {
+      0%, 100% {
+        transform: scaleX(1);
+        opacity: 0.6;
+      }
+      50% {
+        transform: scaleX(2.5);
+        opacity: 1;
+      }
+    }
+
+    .fade-in-up {
+      opacity: 0;
+      transform: translateY(30px) translateZ(0); /* Thêm translateZ(0) */
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+      will-change: transform, opacity; /* Báo trước cho trình duyệt */
+    }
+
+    .fade-in-up.visible {
+      opacity: 1;
+      transform: translateY(0) translateZ(0);
+    }
+    
+    /* NEW STYLES FOR POPUP MENU */
+    #main-popup-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(45deg, #00ff88, #0080ff);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.7);
+      transition: transform 0.3s;
+      z-index: 1000;
+      border: none;
+      /* TỐI ƯU HÓA GPU */
+      transform: translateZ(0); 
+      will-change: transform, box-shadow;
+    }
+    
+    #main-popup {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 350px;
+      max-width: 90%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      z-index: 999;
+      animation: fadeIn 0.3s ease-out forwards;
+      /* TỐI ƯU HÓA GPU */
+      transform: translateZ(0); 
+      will-change: transform, opacity, backdrop-filter;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px) translateZ(0); }
+      to { opacity: 1; transform: translateY(0) translateZ(0); }
+    }
+    
+    /* -------------------------------------- */
+    /* CSS MỚI CHO NÚT POPUP (Music & Script) */
+    /* -------------------------------------- */
+    .popup-tabs {
+      display: flex;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      padding: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .popup-tabs button {
+      flex: 1;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #ccc;
+      font-weight: 700;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      will-change: background, box-shadow, color;
+    }
+
+    .popup-tabs button.active {
+      background: #00ff88;
+      color: #0a0a0a;
+      box-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+      transform: scale(1.02);
+    }
+    
+    .popup-tabs button:not(.active):hover {
+      color: #00ff88;
+    }
+
+    .popup-content > div {
+        display: none;
+        padding: 10px 0;
+    }
+
+    .popup-content > div.active {
+        display: block;
+    }
+
+    /* -------------------------------------- */
+    /* CSS HOÀN NGUYÊN CHO NÚT ĐIỀU KHIỂN NHẠC */
+    /* -------------------------------------- */
+    .music-controls {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 15px;
+    }
+
+    .music-controls button {
+      /* Thiết lập lại về kiểu cơ bản, dùng màu neon xanh lá */
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      font-size: 1.5em;
+      background: #00ff88; /* Màu xanh neon chính của trang */
+      color: #0a0a0a;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 255, 136, 0.8);
+      transition: transform 0.3s, background 0.3s;
+      will-change: transform, background, box-shadow;
+    }
+
+    .music-controls button:hover {
+        background: #00cc77; /* Sậm hơn khi hover */
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(0, 255, 136, 1);
+    }
+    /* Kết thúc phần hoàn nguyên nút nhạc */
+
+  </style>
+</head>
+<body>
+  
+  <h1>ZENOX EXECUTOR</h1>
+  <div class="animated-line"></div>
+
+  <div class="section fade-in-up">
+    <div class="section-title">
+      EXECUTOR ANDROID VNG
+    </div>
+    <div class="card-container">
+      <div class="executor-card fade-in-up">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/codex.png " alt="Executor 2"/>
+        <p class="info-text">CODEX</p>
+        <a class="button" href="https://codex.lol/" target="_blank">Tải về</a>
+      </div>
+      <div 
+class="executor-card fade-in-up">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/arcx.png " alt="Executor 3"/>
+        <p class="info-text">ARCEUS-X-NEO</p>
+        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/K.svg" alt="Executor 4"/>
+        <p class="info-text">KRNL</p>
+        <a class="button" href="https://krnl.cat/" target="_blank">Tải 
+về</a>
+      </div>
+      <div class="executor-card fade-in-up">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/cry.webp" alt="Executor 4"/>
+        <p class="info-text">CRYPTIC</p>
+        <a class="button" href="https://getcryptic.net/" target="_blank">Tải về</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section fade-in-up">
+    <div class="section-title">
+      EXECUTOR ANDROID
+    </div>
+    <div class="card-container">
+      <div 
+class="executor-card fade-in-up">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/deltax.png" alt="Executor 1"/>
+        <p class="info-text">DELTA-X</p>
+        <a class="button" href=" https://deltaexploits.gg/delta-executor-android" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/codex.png " alt="Executor 2"/>
+        <p class="info-text">CODEX</p>
+        <a class="button" href="https://codex.lol/" 
+target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/arcx.png" alt="Executor 3"/>
+        <p class="info-text">ARCEUS-X-NEO</p>
+        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/tri.png" alt="Executor 4"/>
+       
+ <p class="info-text">TRIGON</p>
+        <a class="button" href="https://trigonevo.com/android/ " target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src=" https://cdn.discordapp.com/attachments/1399335670065008791/1410805932652363917/2025082908582972.png?ex=68b25ae9&is=68b10969&hm=298dbae5956e74ef3b4f6acf145a75b2b2005e2a45b782c9e4c3a86cf842b849&" alt="Executor 4"/>
+        <p class="info-text">RONIX</p>
+        <a class="button" href="https://ronixstudios.com/" target="_blank">Tải về</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section fade-in-up">
+    <div class="section-title">EXECUTOR IOS </div>
+   
+  <div class="card-container">
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/deltax.png" alt="Executor IOS 1"/>
+        <p class="info-text">DELTA-X</p>
+        <a class="button" href="https://deltaexploits.gg/delta-executor-ios" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/arcx.png" alt="Executor IOS 2"/>
+        <p 
+class="info-text">ARCUES-X-NEO</p>
+        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/codex.png" alt="Executor IOS 3"/>
+        <p class="info-text">CODEX</p>
+        <a class="button" href="https://codex.lol/" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+     
+    <img src="https://executors-lion-hub.netlify.app/K.svg" alt="Executor IOS 4"/>
+        <p class="info-text">KRNL</p>
+        <a class="button" href="https://krnl.cat/" target="_blank">Tải về</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section fade-in-up">
+    <div class="section-title">EXECUTOR IOS VNG</div>
+    <div class="card-container">
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/K.svg" alt="Executor IOS 1"/>
+        <p class="info-text">KRNL</p>
+  
+       <a class="button" href="https://krnl.cat/" target="_blank">Tải về</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="section fade-in-up">
+    <div class="section-title">EXECUTOR PC</div>
+    <div class="card-container">
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/codex.png" alt="Executor PC 1"/>
+        <p class="info-text">CODEX</p>
+        <a class="button" href="https://codex.lol/" target="_blank">Tải về</a>
+      </div>
+     
+   <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/Sw.webp" alt="Executor PC 2"/>
+        <p class="info-text">TAYLOR-SWIFT</p>
+        <a class="button" href="https://getswift.gg/" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/ad789f5f19f8483da06d1f6a0a8ab9bc" alt="Executor PC 3"/>
+        <p class="info-text">XENO</p>
+       
+  <a class="button" href="https://www.xeno.onl/download" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://executors-lion-hub.netlify.app/arcx.png" alt="Executor PC 4"/>
+        <p class="info-text">ARCEUS-X-NEO</p>
+        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://cdn.discordapp.com/attachments/1312651002264158318/1412654119130370110/2025082908582972.png?ex=68b9142b&is=68b7c2ab&hm=8dee219fedbfba7bb76bf53f135b52a287bd854cac4966d32c0f84ebf5b10c55&" alt="Executor PC 
+4"/>
+        <p class="info-text">RONIX</p>
+        <a class="button" href="https://ronixstudios.com/ " target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+        <div class="status-label">Hoạt động</div>
+        <img src="https://cdn.discordapp.com/attachments/1312651002264158318/1412654118820122747/image.png?ex=68b9142b&is=68b7c2ab&hm=e808a78f0603a25fe77d46c97408942650a03c4ca834943c7f8ed820c85f1d16&" alt="Executor PC 5"/>
+        <p class="info-text">VOLCANO</p>
+        <a class="button" href=" https://volcano.wtf/" target="_blank">Tải về</a>
+      </div>
+      <div class="executor-card fade-in-up ">
+    
+      <div class="status-label">Hoạt động</div>
+        <img src=" https://cdn.discordapp.com/attachments/1330017042459394138/1412737825102888982/Hydrogen-Executor-Logo-img.webp?ex=68ba0ae0&is=68b8b960&hm=5d64f7e493968b50b94100f29dfc16ee8eaa0e829df4aa43955c708e08d8e65b&" alt="Executor PC "/>
+        <p class="info-text">HYDROGEN</p>
+        <a class="button" href="https://hydrogen.lat/" target="_blank">Tải về</a>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="section fade-in-up">
+    <div class="section-title">SUPPORT & CỘNG ĐỒNG</div>
+    <div class="card-container" style="justify-content: center;">
+      <div class="executor-card fade-in-up" style="width: 100%; max-width: 400px; padding: 40px 20px;">
+        <p class="info-text" style="font-size: 1.5em; margin-bottom: 30px;">
+          Tham gia Discord Server để nhận hỗ trợ và thông báo mới nhất!
+        </p>
+        <a class="button" href="https://discord.gg/DdGAmF28h2" target="_blank" 
+           style="background: #0080ff; box-shadow: 0 0 15px rgba(0, 128, 255, 0.8); padding: 15px 30px; font-size: 1.2em;">
+          Tham Gia Server Discord 💬
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-text">© ZENOX COMMUNITY : https://discord.gg/DdGAmF28h2</div>
+  
+  <button id="main-popup-btn">⚙️</button>
+  
+  <div 
+id="main-popup">
+    <div class="popup-tabs">
+      <button id="music-tab" class="active">Music</button>
+      <button id="script-tab">Script</button>
+    </div>
+    
+    <div class="popup-content">
+      <div id="music-content" class="active">
+        <h3>Âm nhạc</h3>
+        <p id="current-song-title" style="margin-bottom: 10px;
+font-weight: bold;"></p>
+        <audio id="audio-player" autoplay loop></audio>
+        <div class="music-controls">
+          <button id="prev-btn">⏮</button>
+          <button id="play-pause-btn">▶</button>
+          <button id="next-btn">⏭</button>
+        </div>
+      </div>
+      
+      <div id="script-content-popup">
+        <p style="font-size: 1.2em; font-weight: bold; margin-bottom: 10px;">
+          Donate Để Quý Có Tiền Ra Net Code 😋.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="galaxy" aria-hidden="true"></canvas>
+  <script>
+    const cvs=document.getElementById('galaxy'), ctx=cvs.getContext('2d');
+    let W,H,stars=[],meteors=[];
+    
+    // ĐIỀU CHỈNH CÂN BẰNG: Giảm số sao xuống 50 để tối ưu hiệu suất
+    const STARS_COUNT = 55; 
+    const STARS_ON = true; 
+
+    function size(){W=cvs.width=innerWidth;H=cvs.height=innerHeight}
+    function makeStars(n){stars=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.2,v:Math.random()*0.25+0.08}))}
+    
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      const grd=ctx.createRadialGradient(W*.7,H*.3,0,W*.7,H*.3,Math.max(W,H)*.8);
+      // Màu gradient nhẹ nhàng
+      grd.addColorStop(0,'rgba(0, 255, 136, 0.02)'); 
+      grd.addColorStop(0.5,'rgba(0, 204, 255, 0.01)'); 
+      grd.addColorStop(1,'transparent');
+      ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+      
+      if(STARS_ON){
+        ctx.fillStyle='#fff';
+        // Vòng lặp vẽ sao tối ưu
+        for(let i = 0; i < stars.length; i++){
+          const s = stars[i];
+          s.y+=s.v; 
+          if(s.y>H){s.y=0; s.x=Math.random()*W} 
+          
+          ctx.beginPath(); 
+          ctx.arc(s.x,s.y,s.r,0,Math.PI*2); 
+          ctx.fill(); 
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    addEventListener('resize',()=>{size(); makeStars(STARS_COUNT)});
+    size(); 
+    makeStars(STARS_COUNT); 
+    draw();
+  </script>
+
+  <script>
+    // Copy Script (Giữ lại logic copy cho nút bấm bất kỳ nếu có sau này)
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const textarea = btn.previousElementSibling;
+          textarea.select();
+          textarea.setSelectionRange(0, 99999);
+          
+navigator.clipboard.writeText(textarea.value).then(() => {
+            const original = btn.textContent;
+btn.textContent = "Đã Sao Chép!";
+            setTimeout(() => btn.textContent = original, 1500);
+}).catch(() => alert("Copy thất bại! Vui lòng copy thủ công."));
+        });
+      });
+      // Đã xóa phần xử lý script-cover cũ
+    });
+
+    // Đã xóa hàm toggleScript(btn) cũ
+  </script>
+  <script>
+    // Scroll reveal effect
+    (function() {
+      const revealElements = document.querySelectorAll('.fade-in-up');
+
+      function revealOnScroll() {
+        const windowHeight = window.innerHeight;
+        revealElements.forEach(el => {
+          const elementTop = el.getBoundingClientRect().top;
+          if (elementTop < windowHeight - 50) {
+            el.classList.add('visible');
+  
+          }
+        });
+      }
+
+      window.addEventListener('scroll', revealOnScroll);
+      window.addEventListener('load', () => {
+        revealElements.forEach(el => el.classList.add('fade-in-up'));
+        revealOnScroll();
+      });
+    })();
+</script>
+  <script>
+    // Popup Menu & Music Player Logic
+    document.addEventListener("DOMContentLoaded", () => {
+      const mainPopupBtn = document.getElementById("main-popup-btn");
+      const mainPopup = document.getElementById("main-popup");
+      const musicTab = document.getElementById("music-tab");
+      const scriptTab = document.getElementById("script-tab");
+      const musicContent = document.getElementById("music-content");
+      const scriptContent = document.getElementById("script-content-popup");
+      
+      // Toggle popup
+      mainPopupBtn.addEventListener('click', () => {
+    
+    mainPopup.style.display = mainPopup.style.display === "flex" ? "none" : "flex";
+      });
+      
+      // Switch tabs
+      musicTab.addEventListener('click', () => {
+        musicTab.classList.add('active');
+        scriptTab.classList.remove('active');
+        musicContent.classList.add('active');
+        scriptContent.classList.remove('active');
+      });
+      
+      scriptTab.addEventListener('click', () => {
+      
+    scriptTab.classList.add('active');
+        musicTab.classList.remove('active');
+        scriptContent.classList.add('active');
+        musicContent.classList.remove('active');
+      });
+
+      // Music Player
+      const audioPlayer = document.getElementById('audio-player');
+const playPauseBtn = document.getElementById('play-pause-btn');
+      const nextBtn = document.getElementById('next-btn');
+      const prevBtn = document.getElementById('prev-btn');
+      const currentSongTitle = document.getElementById('current-song-title');
+const songs = [
+        {
+          title: "Sóng Và Gió - Jàquét 97",
+          url: "https://github.com/QUYDEPTRAI499/Music/raw/refs/heads/main/m%E1%BB%9Bi%20c%C3%A1c%20v%E1%BB%8B%20th%C6%B0%E1%BB%9Fng%20th%E1%BB%A9csonata%20c%E1%BB%A7a%20gi%C3%B3%20v%C3%A0%20bi%E1%BB%83n%20-%20(S%C3%B3ng%20gi%C3%B3%20-%20Symphony%20ver%20-%20J97xK-ICM)%20%23music%20-%20tiger%20music.mp3"
+        },
+        {
+          title: "Nơi Ta Trị Vì - Sone Tune Emtypier",
+          url: "https://github.com/QUYDEPTRAI499/Music/raw/refs/heads/main/m%E1%BB%9Bi%20c%C3%A1c%20v%E1%BB%8B%20th%C6%B0%E1%BB%9Fng%20th%E1%BB%A9cn%C6%A1i%20ta%20ch%E1%BB%89%20v%C3%AC%20-%20(N%C6%A1i%20n%C3%A0y%20c%C3%B3%20anh%20-%20Symphony%20ver%20-%20S%C6%A1n%20T%C3%B9ng%20MTP)%20-%20tiger%20music.mp3"
+        },
+        {
+  
+          title: "Điệu Valse Rời Xa Nhau - Sone Tune Emtypier",
+          url: " https://github.com/QUYDEPTRAI499/Music/raw/refs/heads/main/m%E1%BB%9Bi%20c%C3%A1c%20v%E1%BB%8B%20th%C6%B0%E1%BB%9Fng%20th%E1%BB%A9c%C4%91i%E1%BB%87u%20valse%20r%E1%BB%9Di%20xa%20nhau(%C4%91%E1ºm%20ch%E1º¥t%20qu%C3%BD%20s%E1»%9F%20t%E1»™c)%20%23music%20%23nhachaymoingay%20-%20tiger%20music.mp3"
+        },
+        {
+          title: "Anh Vui Đến Nỗi Nghẹn Ngào - Phạm Kỳ",
+          url: "Anh Vui - Phạm Kỳ (Duzme Remix) _ Anh Vui Đến Nỗi Nghẹn Ngào...Remix Tik Tok.mp3"
+        }
+      ];
+let currentSongIndex = 0;
+
+      function loadSong(index) {
+        audioPlayer.src = songs[index].url;
+        currentSongTitle.textContent = songs[index].title;
+audioPlayer.load();
+        audioPlayer.play();
+        playPauseBtn.textContent = '⏸';
+      }
+
+      playPauseBtn.addEventListener('click', () => {
+        if (audioPlayer.paused) {
+          audioPlayer.play();
+          playPauseBtn.textContent = '⏸';
+        } else {
+          audioPlayer.pause();
+          playPauseBtn.textContent = '▶';
+        }
+      });
+nextBtn.addEventListener('click', () => {
+        currentSongIndex = (currentSongIndex + 1) % songs.length;
+        loadSong(currentSongIndex);
+      });
+prevBtn.addEventListener('click', () => {
+        currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+        loadSong(currentSongIndex);
+      });
+      
+      audioPlayer.addEventListener('ended', () => {
+        currentSongIndex = (currentSongIndex + 1) % songs.length;
+        loadSong(currentSongIndex);
+      });
+
+      // Initialize
+      loadSong(currentSongIndex);
+      // Hide script content on load
+      scriptContent.classList.remove('active');
+    });
+</script>
+</body>
+</html>

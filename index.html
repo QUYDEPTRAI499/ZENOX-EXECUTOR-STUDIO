@@ -1,625 +1,487 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ZENOX EXECUTOR - TỐI ƯU HÓA</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap');
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="NULLIX HUB - Quản lý Executor Roblox Android & PC chuyên nghiệp, link luôn cập nhật mới nhất."/>
+    <meta name="theme-color" content="#050505"/>
+    <title>ZENOX STUDIO - Quản lý Executor Chuyên Nghiệp</title>
     
-    * { margin:0; padding:0; box-sizing:border-box; }
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-    html, body {
-      font-family: 'Rajdhani', sans-serif;
-      background: #0a0a0a;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: #fff;
-      overflow-x: hidden;
-      position: relative;
-      padding: 40px 0 120px;
-    }
+    <style>
+        :root {
+            --bg: #050505;
+            --card-bg: rgba(13, 13, 25, 0.94);
+            --card-border: rgba(88, 101, 242, 0.22);
+            --text: #f0f0ff;
+            --text-secondary: #aaa;
+            --primary: #5865f2;
+            --accent: #00d4ff;
+            --status-online: #00ff9d;
+            --status-offline: #ff5555;
+            --fix-color: #ff9500;
+            --glow: 0 0 35px rgba(88, 101, 242, 0.55);
+            --glow-accent: 0 0 35px rgba(0, 212, 255, 0.45);
+            --toast-bg-success: linear-gradient(135deg, #00c896, #00ff9d);
+            --toast-bg-error: linear-gradient(135deg, #ff5555, #ff3366);
+            --shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
 
-    #galaxy {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      transform: translateZ(0);
-    }
+        [data-theme="light"] {
+            --bg: #f8f9ff;
+            --card-bg: #ffffff;
+            --card-border: rgba(88, 101, 242, 0.15);
+            --text: #1a1a3d;
+            --text-secondary: #5f5f7e;
+            --primary: #4c55d9;
+            --accent: #0099cc;
+            --status-online: #00b386;
+            --status-offline: #e63946;
+            --fix-color: #ffaa00;
+            --glow: 0 0 25px rgba(76, 85, 217, 0.35);
+            --glow-accent: 0 0 25px rgba(0, 153, 204, 0.35);
+            --shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
 
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.02); opacity: 0.95; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    
-    h1 {
-      font-family: 'Orbitron', monospace;
-      font-size: 5em;
-      margin-bottom: 15px;
-      animation: pulse 2.5s infinite;
-      background: linear-gradient(45deg, #00ff88, #0080ff, #ff0080);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 15px rgba(0,255,136,0.4);
-      z-index: 1;
-    }
-    
-    .animated-line {
-      width: 220px;
-      height: 4px;
-      background: #00ff88;
-      box-shadow: 0 0 12px #00ff88, 0 0 24px #00ff88;
-      animation: pulseLine 1.8s ease-in-out infinite;
-      margin-bottom: 25px;
-      border-radius: 2px;
-      z-index: 1;
-    }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
+            transition: background 0.5s ease, color 0.5s ease;
+            line-height: 1.6;
+        }
 
-    @keyframes pulseLine {
-      0%, 100% { transform: scaleX(1); opacity: 0.7; }
-      50% { transform: scaleX(2.8); opacity: 1; }
-    }
+        #toast-container {
+            position: fixed; bottom: 24px; right: 24px; z-index: 10001;
+            display: flex; flex-direction: column; gap: 12px;
+        }
 
-    .search-container {
-      width: 90%;
-      max-width: 700px;
-      margin: 20px auto 30px;
-      z-index: 2;
-    }
+        .toast {
+            min-width: 300px; padding: 16px 24px; border-radius: 12px;
+            font-weight: 600; color: white; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: flex; align-items: center; gap: 14px;
+            animation: slideIn 0.4s ease-out forwards;
+        }
+        .toast.success { background: var(--toast-bg-success); }
+        .toast.error   { background: var(--toast-bg-error); }
 
-    #searchInput {
-      width: 100%;
-      padding: 16px 24px;
-      font-size: 1.25em;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(0,255,136,0.35);
-      border-radius: 50px;
-      color: #fff;
-      outline: none;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 20px rgba(0,255,136,0.15);
-      transition: all 0.3s;
-    }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-    #searchInput:focus {
-      border-color: #00ff88;
-      box-shadow: 0 0 30px rgba(0,255,136,0.5);
-    }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
 
-    .filter-tabs {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 0 auto 30px;
-      max-width: 90%;
-      z-index: 2;
-    }
+        .header { text-align: center; padding: 100px 20px 50px; }
+        .header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 12vw, 5.5rem);
+            background: linear-gradient(90deg, #00ff9d, var(--primary), var(--accent));
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 10s infinite; letter-spacing: 6px;
+        }
+        @keyframes gradientFlow { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
 
-    .filter-btn {
-      padding: 10px 28px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(0,255,136,0.3);
-      color: #ddd;
-      border-radius: 30px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
+        .search-container { max-width: 560px; margin: 0 auto 20px; position: relative; }
+        .search-input {
+            width: 100%; padding: 16px 20px 16px 56px; border-radius: 999px;
+            background: rgba(255,255,255,0.06); border: 1px solid var(--card-border);
+            color: var(--text); font-size: 1.05rem; outline: none; transition: all 0.3s;
+        }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(88,101,242,0.35); }
+        .search-icon { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 1.3rem; }
 
-    .filter-btn.active, .filter-btn:hover {
-      background: #00ff88;
-      color: #0a0a0a;
-      box-shadow: 0 0 18px rgba(0,255,136,0.7);
-    }
+        .refresh-btn {
+            display: block; margin: 0 auto 48px; padding: 14px 32px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; border: none; border-radius: 999px; font-weight: 700;
+            font-size: 1.05rem; cursor: pointer; box-shadow: 0 8px 25px rgba(88,101,242,0.4);
+            transition: all 0.3s;
+        }
+        .refresh-btn:hover { transform: translateY(-4px); box-shadow: 0 15px 40px rgba(88,101,242,0.6); }
 
-    .section {
-      width: 90%;
-      max-width: 1400px;
-      margin: 40px 0;
-      z-index: 1;
-    }
+        .section-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin: 60px 0 28px; padding-bottom: 16px; border-bottom: 2px solid var(--card-border); }
+        .section-header h2 { font-size: 2rem; font-weight: 700; display: flex; align-items: center; gap: 12px; }
 
-    .section-title {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.8em;
-      font-family: 'Orbitron', monospace;
-      margin-bottom: 25px;
-      text-shadow: 0 0 10px #00ff88;
-      gap: 15px;
-    }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; gap: 20px; } }
 
-    .platform-icon {
-      font-size: 1.2em; /* emoji size */
-      width: 60px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,255,136,0.15);
-      border-radius: 50%;
-      border: 2px solid #00ff88;
-      box-shadow: 0 0 15px rgba(0,255,136,0.5);
-    }
+        .card {
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+            padding: 28px; position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: var(--shadow);
+        }
+        .card:hover { transform: translateY(-14px) scale(1.02); border-color: var(--accent); box-shadow: 0 24px 60px rgba(0,0,0,0.45), var(--glow); }
 
-    .card-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 30px;
-    }
+        .badge-container { position: absolute; top: 14px; left: 14px; display: flex; flex-wrap: wrap; gap: 8px; z-index: 6; }
+        .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.74rem; font-weight: 700; color: white; box-shadow: 0 3px 10px rgba(0,0,0,0.5); }
 
-    .executor-card {
-      background: rgba(255,255,255,0.03);
-      padding: 25px;
-      border-radius: 16px;
-      border: 1px solid rgba(0,255,136,0.25);
-      backdrop-filter: blur(6px);
-      text-align: center;
-      transition: all 0.4s;
-    }
+        .fix-card { border-color: var(--fix-color); background: rgba(255,149,0,0.08); }
+        .fix-card:hover { box-shadow: 0 0 30px rgba(255,149,0,0.45); }
 
-    .executor-card:hover {
-      transform: translateY(-12px) scale(1.04);
-      box-shadow: 0 0 35px rgba(0,255,136,0.55);
-      border-color: #00ff88;
-    }
+        .card-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+        .card-icon { width: 68px; height: 68px; border-radius: 16px; overflow: hidden; border: 1px solid var(--card-border); }
+        .card-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .card-title { font-size: 1.45rem; font-weight: 700; }
 
-    .status-label {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: #00ff88;
-      color: #0a0a0a;
-      font-weight: 700;
-      font-size: 0.85em;
-      padding: 4px 10px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,255,136,0.7);
-    }
+        .status-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; min-height: 32px; }
+        .mini-status {
+            padding: 6px 16px; border-radius: 50px; font-size: 0.82rem; font-weight: 700;
+            text-transform: uppercase; background: rgba(255,255,255,0.06);
+        }
+        .status-online  { background: rgba(0,255,157,0.18); color: var(--status-online); }
+        .status-offline { background: rgba(255,85,85,0.18); color: var(--status-offline); }
 
-    .executor-card img {
-      width: 100%;
-      height: 180px;
-      object-fit: contain;
-      border-radius: 12px;
-      margin-bottom: 15px;
-      background: rgba(0,0,0,0.3);
-    }
+        .button-group { display: flex; flex-wrap: wrap; gap: 12px; }
+        .download-btn, .report-btn {
+            flex: 1; min-width: 140px; padding: 16px; border-radius: 14px;
+            text-decoration: none; font-weight: 700; display: flex; align-items: center;
+            justify-content: center; gap: 10px; transition: all 0.35s; cursor: pointer;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, var(--primary), #7b5eff);
+            color: white; box-shadow: 0 10px 30px rgba(88,101,242,0.5);
+        }
+        .download-btn:hover { transform: translateY(-5px); box-shadow: 0 18px 50px rgba(88,101,242,0.7); }
+        .fix-btn { background: linear-gradient(135deg, var(--fix-color), #ffaa33) !important; }
+        .report-btn {
+            background: rgba(255,85,85,0.15); color: #ff5555; font-size: 0.98rem; flex: 0 0 auto;
+        }
+        .report-btn:hover { background: rgba(255,85,85,0.3); }
 
-    .executor-card .info-text {
-      font-size: 1.4em;
-      font-weight: 700;
-      margin: 10px 0 18px;
-      text-shadow: 0 0 6px #fff;
-    }
+        .support-section {
+            margin: 70px auto 100px; padding: 40px 30px; background: var(--card-bg);
+            border-radius: 20px; border: 1px solid var(--card-border); text-align: center; max-width: 700px;
+        }
+        .join-discord-btn {
+            display: inline-flex; align-items: center; gap: 12px; padding: 16px 36px;
+            background: #5865f2; color: white; font-weight: 700; font-size: 1.1rem;
+            border-radius: 50px; text-decoration: none; transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(88,101,242,0.4);
+        }
+        .join-discord-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(88,101,242,0.6); background: #4752c4; }
 
-    .executor-card .button {
-      padding: 12px 28px;
-      background: #00ff88;
-      color: #0a0a0a;
-      text-decoration: none;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1.1em;
-      box-shadow: 0 0 15px rgba(0,255,136,0.6);
-      transition: all 0.3s;
-    }
+        .theme-toggle {
+            position: fixed; top: 24px; right: 24px; z-index: 1000;
+            background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border); border-radius: 999px; padding: 12px 20px;
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+        }
+        @media (max-width: 768px) { .theme-toggle { top: 16px; right: 16px; padding: 10px 16px; } }
 
-    .executor-card .button:hover {
-      transform: scale(1.08);
-      box-shadow: 0 0 25px rgba(0,255,136,0.9);
-    }
-
-    .footer-text {
-      margin-top: 60px;
-      font-size: 1.3em;
-      color: #aaa;
-      text-align: center;
-      z-index: 1;
-    }
-
-    #main-popup-btn {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      width: 65px;
-      height: 65px;
-      background: linear-gradient(45deg, #00ff88, #0080ff);
-      border-radius: 50%;
-      font-size: 32px;
-      color: #fff;
-      cursor: pointer;
-      box-shadow: 0 0 25px rgba(0,255,136,0.7);
-      border: none;
-      z-index: 1000;
-    }
-
-    #main-popup {
-      position: fixed;
-      bottom: 100px;
-      right: 25px;
-      width: 360px;
-      max-width: 92%;
-      background: rgba(255,255,255,0.08);
-      border-radius: 20px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 0 35px rgba(0,255,136,0.5);
-      border: 1px solid rgba(0,255,136,0.35);
-      padding: 25px;
-      display: none;
-      flex-direction: column;
-      z-index: 999;
-      animation: fadeIn 0.3s;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(25px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Các style popup, music controls, tabs giữ nguyên như cũ */
-    .popup-tabs { display: flex; margin-bottom: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 6px; border: 1px solid rgba(0,255,136,0.25); }
-    .popup-tabs button { flex:1; padding:10px; border:none; border-radius:10px; background:transparent; color:#ccc; font-weight:700; cursor:pointer; transition:all 0.3s; }
-    .popup-tabs button.active { background:#00ff88; color:#0a0a0a; box-shadow:0 0 12px rgba(0,255,136,0.7); }
-    .popup-content > div { display:none; }
-    .popup-content > div.active { display:block; }
-    .music-controls { display:flex; justify-content:space-around; margin-top:20px; }
-    .music-controls button { width:55px; height:55px; border-radius:50%; font-size:1.6em; background:#00ff88; color:#0a0a0a; border:none; cursor:pointer; box-shadow:0 0 12px rgba(0,255,136,0.7); transition:all 0.3s; }
-    .music-controls button:hover { background:#00cc77; transform:scale(1.1); box-shadow:0 0 20px rgba(0,255,136,0.9); }
-
-    .fade-in-up { opacity:0; transform:translateY(40px); transition:opacity 0.8s ease-out, transform 0.8s ease-out; }
-    .fade-in-up.visible { opacity:1; transform:translateY(0); }
-
-    @media (max-width: 768px) {
-      h1 { font-size:3.5em; }
-      .section-title { font-size:2.2em; }
-      .platform-icon { width:50px; height:50px; font-size:1em; }
-    }
-  </style>
+        #galaxy { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+    </style>
 </head>
-<body>
+<body data-theme="dark">
 
-  <canvas id="galaxy" aria-hidden="true"></canvas>
+    <div id="toast-container"></div>
 
-  <h1>ZENOX EXECUTOR</h1>
-  <div class="animated-line"></div>
-
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Tìm executor (Delta, Codex, Arceus, Android, iOS...)">
-  </div>
-
-  <div class="filter-tabs">
-    <button class="filter-btn active" data-filter="all">Tất cả</button>
-    <button class="filter-btn" data-filter="android">Android</button>
-    <button class="filter-btn" data-filter="ios">iOS</button>
-    <button class="filter-btn" data-filter="pc">PC</button>
-    <button class="filter-btn" data-filter="vng">VNG</button>
-  </div>
-
-  <!-- Section Android VNG -->
-  <div class="section">
-    <div class="section-title">
-      <div class="platform-icon">📱</div> Executor Android VNG
+    <div class="theme-toggle" onclick="toggleTheme()" aria-label="Chuyển chế độ sáng/tối">
+        <i class="fas fa-moon" id="theme-icon"></i>
+        <span>Chế độ</span>
     </div>
-    <div class="card-container">
-      <div class="executor-card fade-in-up" data-category="android vng">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/codex.png" alt="Codex">
-        <p class="info-text">CODEX</p>
-        <a class="button" href="https://codex.lol/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="android vng">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/arcx.png" alt="Arceus X Neo">
-        <p class="info-text">ARCEUS-X-NEO</p>
-        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="android vng">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/K.svg" alt="KRNL">
-        <p class="info-text">KRNL</p>
-        <a class="button" href="https://krnl.cat/" target="_blank">Tải về</a>
-      </div>
-    </div>
-  </div>
 
-  <!-- Section Android -->
-  <div class="section">
-    <div class="section-title">
-      <div class="platform-icon">📱</div> Executor Android
-    </div>
-    <div class="card-container">
-      <div class="executor-card fade-in-up" data-category="android">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/deltax.png" alt="Delta X">
-        <p class="info-text">DELTA-X</p>
-        <a class="button" href="https://deltaexploits.gg/delta-executor-android" target="_blank">Tải về</a>
-      </div>
-      <!-- Các card Android khác copy tương tự từ code cũ -->
-      <div class="executor-card fade-in-up" data-category="android">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/codex.png" alt="Codex">
-        <p class="info-text">CODEX</p>
-        <a class="button" href="https://codex.lol/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="android">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/arcx.png" alt="Arceus X Neo">
-        <p class="info-text">ARCEUS-X-NEO</p>
-        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="android">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/tri.png" alt="Trigon">
-        <p class="info-text">TRIGON</p>
-        <a class="button" href="https://trigonevo.com/android/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="android">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://cdn.discordapp.com/attachments/1399335670065008791/1410805932652363917/2025082908582972.png?ex=68b25ae9&is=68b10969&hm=298dbae5956e74ef3b4f6acf145a75b2b2005e2a45b782c9e4c3a86cf842b849&" alt="Ronix">
-        <p class="info-text">RONIX</p>
-        <a class="button" href="https://ronixstudios.com/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="android pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/cry.webp" alt="Cryptic">
-        <p class="info-text">CRYPTIC</p>
-        <a class="button" href="https://getcryptic.net/" target="_blank">Tải về</a>
-      </div>
-    </div>
-  </div>
+    <canvas id="galaxy"></canvas>
 
-  <!-- Section iOS -->
-  <div class="section">
-    <div class="section-title">
-      <div class="platform-icon">🍎</div> Executor iOS
-    </div>
-    <div class="card-container">
-      <div class="executor-card fade-in-up" data-category="ios">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/deltax.png" alt="Delta X">
-        <p class="info-text">DELTA-X</p>
-        <a class="button" href="https://deltaexploits.gg/delta-executor-ios" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="ios">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/arcx.png" alt="Arceus X Neo">
-        <p class="info-text">ARCEUS-X-NEO</p>
-        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="ios">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/codex.png" alt="Codex">
-        <p class="info-text">CODEX</p>
-        <a class="button" href="https://codex.lol/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="ios">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/K.svg" alt="KRNL">
-        <p class="info-text">KRNL</p>
-        <a class="button" href="https://krnl.cat/" target="_blank">Tải về</a>
-      </div>
-    </div>
-  </div>
+    <header class="header">
+        <h1>NULLIX HUB</h1>
+        <p>Hệ thống Executor Android & PC Đầy Đủ - Update liên tục</p>
+    </header>
 
-  <!-- Section iOS VNG -->
-  <div class="section">
-    <div class="section-title">
-      <div class="platform-icon">🇻🇳</div> Executor iOS VNG
-    </div>
-    <div class="card-container">
-      <div class="executor-card fade-in-up" data-category="vng">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/K.svg" alt="KRNL">
-        <p class="info-text">KRNL</p>
-        <a class="button" href="https://krnl.cat/" target="_blank">Tải về</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Section PC -->
-  <div class="section">
-    <div class="section-title">
-      <div class="platform-icon">💻</div> Executor PC
-    </div>
-    <div class="card-container">
-      <div class="executor-card fade-in-up" data-category="pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/codex.png" alt="Codex">
-        <p class="info-text">CODEX</p>
-        <a class="button" href="https://codex.lol/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/Sw.webp" alt="Taylor Swift">
-        <p class="info-text">TAYLOR-SWIFT</p>
-        <a class="button" href="https://getswift.gg/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://images.crunchbase.com/image/upload/c_pad,f_auto,q_auto:eco,dpr_1/ad789f5f19f8483da06d1f6a0a8ab9bc" alt="Xeno">
-        <p class="info-text">XENO</p>
-        <a class="button" href="https://www.xeno.onl/download" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://executors-lion-hub.netlify.app/arcx.png" alt="Arceus X Neo">
-        <p class="info-text">ARCEUS-X-NEO</p>
-        <a class="button" href="https://spdmteam.com/index?os=android" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://cdn.discordapp.com/attachments/1312651002264158318/1412654119130370110/2025082908582972.png?ex=68b9142b&is=68b7c2ab&hm=8dee219fedbfba7bb76bf53f135b52a287bd854cac4966d32c0f84ebf5b10c55&" alt="Ronix">
-        <p class="info-text">RONIX</p>
-        <a class="button" href="https://ronixstudios.com/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://cdn.discordapp.com/attachments/1312651002264158318/1412654118820122747/image.png?ex=68b9142b&is=68b7c2ab&hm=e808a78f0603a25fe77d46c97408942650a03c4ca834943c7f8ed820c85f1d16&" alt="Volcano">
-        <p class="info-text">VOLCANO</p>
-        <a class="button" href="https://volcano.wtf/" target="_blank">Tải về</a>
-      </div>
-      <div class="executor-card fade-in-up" data-category="pc">
-        <div class="status-label">Hoạt động</div>
-        <img src="https://cdn.discordapp.com/attachments/1330017042459394138/1412737825102888982/Hydrogen-Executor-Logo-img.webp?ex=68ba0ae0&is=68b8b960&hm=5d64f7e493968b50b94100f29dfc16ee8eaa0e829df4aa43955c708e08d8e65b&" alt="Hydrogen">
-        <p class="info-text">HYDROGEN</p>
-        <a class="button" href="https://hydrogen.lat/" target="_blank">Tải về</a>
-      </div>
-    </div>
-  </div>
-
-  <div class="footer-text">© ZENOX STUDIO : https://discord.gg/DdGAmF28h2</div>
-
-  <button id="main-popup-btn">⚙️</button>
-
-  <div id="main-popup">
-    <div class="popup-tabs">
-      <button id="music-tab" class="active">Music</button>
-      <button id="script-tab">Support</button>
-    </div>
-    <div class="popup-content">
-      <div id="music-content" class="active">
-        <h3>Âm nhạc</h3>
-        <p id="current-song-title" style="margin:10px 0; font-weight:bold; font-size:1.2em;"></p>
-        <audio id="audio-player" autoplay loop></audio>
-        <div class="music-controls">
-          <button id="prev-btn">⏮</button>
-          <button id="play-pause-btn">▶</button>
-          <button id="next-btn">⏭</button>
+    <div class="container">
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Tìm executor (ví dụ: arceus, delta, salo...)" aria-label="Tìm kiếm executor">
         </div>
-      </div>
-      <div id="script-content-popup">
-        <p style="font-size:1.3em; font-weight:bold; text-align:center;">
-          Server Support: <br>
-          <a href="https://discord.gg/DdGAmF28h2" target="_blank" style="color:#00ff88;">https://discord.gg/DdGAmF28h2</a>
-        </p>
-      </div>
+
+        <button id="refresh-all" class="refresh-btn" onclick="loadLinks(false)">
+            <i class="fas fa-sync-alt"></i> Refresh All Links
+        </button>
+
+        <div class="section-header">
+            <h2><i class="fab fa-android"></i> Android Executors</h2>
+            <div class="last-update" id="android-update">Đang tải...</div>
+        </div>
+        <div class="grid" id="android-grid"></div>
+
+        <div class="section-header">
+            <h2><i class="fas fa-desktop"></i> PC Executors</h2>
+            <div class="last-update" id="pc-update">Đang tải...</div>
+        </div>
+        <div class="grid" id="pc-grid"></div>
+
+        <div class="support-section">
+            <h2 style="margin-bottom: 20px; color: var(--primary);">Cần hỗ trợ hoặc báo lỗi?</h2>
+            <p style="margin-bottom: 30px; color: var(--text-secondary);">
+                Tham gia server Discord chính thức để được hỗ trợ nhanh, cập nhật link mới nhất và trao đổi với cộng đồng!
+            </p>
+            <a href="https://discord.gg/59XF8hMW5R" target="_blank" class="join-discord-btn" aria-label="Tham gia Discord">
+                <i class="fab fa-discord" style="font-size:1.5rem;"></i>
+                Tham gia Discord ngay
+            </a>
+        </div>
+
+        <footer style="text-align:center; padding:80px 0 40px; opacity:0.7; font-size:0.95rem;">
+            Designed & Maintained by <strong style="color:var(--accent);">Nullix (BNMhuy)</strong> • 2025–2026
+        </footer>
     </div>
-  </div>
 
-  <script>
-    // Canvas galaxy giữ nguyên
-    const cvs = document.getElementById('galaxy');
-    const ctx = cvs.getContext('2d');
-    let W, H, stars = [];
-    const STARS_COUNT = 55;
+    <script>
+        const $ = s => document.querySelector(s);
+        const $$ = s => document.querySelectorAll(s);
 
-    function size() { W = cvs.width = innerWidth; H = cvs.height = innerHeight; }
-    function makeStars(n) {
-      stars = Array.from({length:n}, () => ({ x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.5+0.2, v:Math.random()*0.25+0.08 }));
-    }
-    function draw() {
-      ctx.clearRect(0,0,W,H);
-      const grd = ctx.createRadialGradient(W*.7, H*.3, 0, W*.7, H*.3, Math.max(W,H)*.8);
-      grd.addColorStop(0,'rgba(0,255,136,0.03)');
-      grd.addColorStop(0.5,'rgba(0,204,255,0.015)');
-      grd.addColorStop(1,'transparent');
-      ctx.fillStyle = grd; ctx.fillRect(0,0,W,H);
-      ctx.fillStyle = '#fff';
-      stars.forEach(s => {
-        s.y += s.v;
-        if (s.y > H) { s.y = 0; s.x = Math.random()*W; }
-        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
-      });
-      requestAnimationFrame(draw);
-    }
-    addEventListener('resize', () => { size(); makeStars(STARS_COUNT); });
-    size(); makeStars(STARS_COUNT); draw();
-  </script>
+        function showToast(message, type = "success") {
+            const container = $('#toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4200);
+        }
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const searchInput = document.getElementById('searchInput');
-      const cards = document.querySelectorAll('.executor-card');
-      const filterBtns = document.querySelectorAll('.filter-btn');
+        // Theme
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            $('#theme-icon').className = next === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+            updateStarColor();
+        }
 
-      searchInput.addEventListener('input', () => {
-        const query = searchInput.value.toLowerCase().trim();
-        cards.forEach(card => {
-          card.style.display = card.textContent.toLowerCase().includes(query) ? '' : 'none';
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.body.setAttribute('data-theme', savedTheme);
+            $('#theme-icon').className = savedTheme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Data
+        const androidExecutors = [
+            { id: 'arceus', name: 'Arceus X NEO', ver: '2.703', icon: 'https://sf-static.upanhlaylink.com/img/image_2025091341b69c6afa4e02709bf1ba299bdbafbd.jpg', types: ['qt', 'vng'] },
+            { id: 'codex',   name: 'Codex',       ver: '2.703', icon: 'https://codex.lol/static/icons/icon.svg', types: ['qt', 'vng'] },
+            { id: 'delta',   name: 'Delta',       ver: '2.704', icon: 'https://sf-static.upanhlaylink.com/img/image_2025091320b780aa4e49c945bdddf569984a41b6.jpg', types: ['qt', 'vng'] },
+            { id: 'ronix',   name: 'Ronix',       ver: '2.704', icon: 'https://wearedevs.net/images/ronix/ronix-animated.gif', types: ['qt', 'vng'] },
+            { id: 'trigon',  name: 'Trigon',      ver: '2.704', icon: 'https://trigonevo.com/wp-content/uploads/2021/09/cropped-New-Trigon-with-Shadow-300x300.png.webp', types: ['qt'] },
+            { id: 'vegax',   name: 'Vega X',      ver: '2.703', icon: 'https://vegax.gg/assets/img/V_logo_white.png', types: ['qt'] },
+            { id: 'fluxusz', name: 'FluxusZ',     ver: '2.703', icon: 'https://files.catbox.moe/qt87ws.webp', types: ['qt', 'vng'] },
+            { id: 'cryptic', name: 'Cryptic',     ver: '2.704', icon: 'https://getcryptic.net/logo.png', types: ['qt', 'vng'] },
+        ];
+
+        const pcExecutors = [
+            { id: 'xeno',        name: 'Xeno PC',         icon: 'https://www.xeno.onl/images/xeno.png' },
+            { id: 'bunni',       name: 'Bunni Xeno',      icon: 'https://sf-static.upanhlaylink.com/img/image_20251107ec93fb41bcff1cb31ece2f29c4c3d623.jpg' },
+            { id: 'ronix_pc',    name: 'Ronix PC',        icon: 'https://wearedevs.net/images/ronix/ronix-animated.gif' },
+            { id: 'onyx',        name: 'Onyx PC',         icon: 'https://cdn-icons-png.flaticon.com/512/11546/11546303.png' },
+            { id: 'tng_pc',      name: 'TNG PC',          icon: 'https://cdn-icons-png.flaticon.com/512/2620/2620701.png' },
+            { id: 'velocity_pc', name: 'Velocity PC',     icon: 'https://files.catbox.moe/tj6brv.png' },
+            { id: 'salo_pc',     name: 'Salo Client PC',  icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968292.png' },
+        ];
+
+        // Render
+        function renderExecutors(list, containerId, isPc = false) {
+            const container = $(`#${containerId}`);
+            container.innerHTML = '';
+
+            list.forEach(ex => {
+                const isFix = ex.isFix || false;
+                const badgeHTML = '';
+                
+                // Status Handling
+                let statusHTML = '';
+                if (isPc) {
+                    statusHTML += `<div id="status-${ex.id}" class="mini-status status-offline">PC: Checking...</div>`;
+                    // Thêm status cho TNG Roblox nếu là TNG PC
+                    if (ex.id === 'tng_pc') {
+                        statusHTML += `<div id="status-tng_roblox" class="mini-status status-offline">ROBLOX TNG: Checking...</div>`;
+                    }
+                } else {
+                    statusHTML = ex.types.map(t => `<div id="status-${ex.id}-${t}" class="mini-status status-offline">${t.toUpperCase()}: Checking...</div>`).join('');
+                }
+
+                // Button Handling
+                let btnHTML = '';
+                if (isPc) {
+                     btnHTML += `<a href="#" class="download-btn ${isFix ? 'fix-btn' : ''}" id="btn-${ex.id}">
+                         <i class="${isFix ? 'fas fa-tools' : 'fas fa-desktop'}"></i> ${isFix ? 'Download Fix' : 'Download PC'}
+                       </a>`;
+                     
+                     // Thêm nút Download Roblox cho TNG PC
+                     if (ex.id === 'tng_pc') {
+                         btnHTML += `<a href="#" class="download-btn" id="btn-tng_roblox" style="background: linear-gradient(135deg, #FF512F, #DD2476);">
+                             <i class="fas fa-gamepad"></i> Roblox TNG
+                         </a>`;
+                     }
+                } else {
+                    btnHTML = ex.types.map(t => `
+                        <a href="#" class="download-btn" id="btn-${ex.id}-${t}">
+                          <i class="fas fa-download"></i> ${t.toUpperCase()}
+                        </a>
+                    `).join('');
+                }
+
+                const reportHTML = `<a href="https://discord.gg/59XF8hMW5R" target="_blank" class="report-btn">
+                    <i class="fas fa-bug"></i> Báo lỗi
+                </a>`;
+
+                container.innerHTML += `
+                    <div class="card ${isFix ? 'fix-card' : ''}" data-name="${ex.name.toLowerCase()}" data-id="${ex.id}">
+                        ${badgeHTML}
+                        <div class="card-top">
+                            <div class="card-icon">
+                                <img src="${ex.icon}" alt="${ex.name}" loading="lazy" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3039/3039403.png'">
+                            </div>
+                            <div>
+                                <div class="card-title">${ex.name}</div>
+                                ${ex.ver ? `<div style="color:var(--text-secondary); font-size:0.9rem;">v${ex.ver}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="status-group">${statusHTML}</div>
+                        <div class="button-group">
+                            ${btnHTML}
+                            ${reportHTML}
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // Load links
+        let isRefreshing = false;
+        async function loadLinks(silent = false) {
+            if (isRefreshing) return;
+            isRefreshing = true;
+
+            try {
+                const res = await fetch('https://raw.githubusercontent.com/HypatiaDz/111/main/links.json?t=' + Date.now());
+                if (!res.ok) throw new Error('Network response was not ok');
+                const data = await res.json();
+
+                const update = (id, link, prefix) => {
+                    const btn = $(`#btn-${id}`);
+                    const st = $(`#status-${id}`);
+                    if (!btn || !st) return;
+
+                    if (link && typeof link === 'string' && link.startsWith('http')) {
+                        btn.href = link;
+                        btn.target = "_blank";
+                        st.className = "mini-status status-online";
+                        st.innerText = `${prefix}: Online`;
+                    } else {
+                        btn.href = "#";
+                        st.className = "mini-status status-offline";
+                        st.innerText = `${prefix}: Bảo trì`;
+                    }
+                };
+
+                androidExecutors.forEach(ex => {
+                    ex.types.forEach(t => update(`${ex.id}-${t}`, data[`${ex.id}_${t}`], t.toUpperCase()));
+                });
+
+                pcExecutors.forEach(ex => {
+                    update(ex.id, data[ex.id], ex.isFix ? 'Fix Tool' : 'PC');
+                });
+                
+                // Cập nhật riêng cho nút Roblox TNG
+                update('tng_roblox', data['tng_roblox'], 'ROBLOX TNG');
+
+                const time = new Date().toLocaleString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'});
+                $('#android-update').textContent = `Cập nhật: ${time}`;
+                $('#pc-update').textContent = `Cập nhật: ${time}`;
+
+                if (!silent) showToast("Cập nhật link thành công!", "success");
+            } catch (err) {
+                console.error("Load links failed:", err);
+                showToast("Không thể tải link. Vui lòng thử lại sau.", "error");
+            } finally {
+                isRefreshing = false;
+            }
+        }
+
+        // Search với debounce
+        let searchTimeout;
+        $('#searchInput').addEventListener('input', e => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const q = e.target.value.toLowerCase().trim();
+                $$('.card').forEach(card => {
+                    card.style.display = card.dataset.name.includes(q) ? '' : 'none';
+                });
+            }, 300);
         });
-      });
 
-      filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          filterBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const filter = btn.dataset.filter;
-          cards.forEach(card => {
-            const cat = card.dataset.category || '';
-            card.style.display = (filter === 'all' || cat.includes(filter)) ? '' : 'none';
-          });
+        // Right click copy + maintenance click
+        document.addEventListener('contextmenu', e => {
+            const btn = e.target.closest('.download-btn');
+            if (btn && btn.href && btn.href.startsWith('http')) {
+                e.preventDefault();
+                navigator.clipboard.writeText(btn.href).then(() => showToast("Đã copy link tải xuống!", "success"));
+            }
         });
-      });
 
-      // Fade-in
-      const reveals = document.querySelectorAll('.fade-in-up');
-      function checkReveal() {
-        const wh = window.innerHeight;
-        reveals.forEach(el => {
-          if (el.getBoundingClientRect().top < wh - 60) el.classList.add('visible');
+        document.addEventListener('click', e => {
+            const btn = e.target.closest('.download-btn');
+            if (btn && btn.href === '#') {
+                e.preventDefault();
+                showToast("Executor này đang bảo trì, vui lòng thử lại sau!", "error");
+            }
         });
-      }
-      window.addEventListener('scroll', checkReveal);
-      checkReveal();
 
-      // Popup
-      document.getElementById('main-popup-btn').addEventListener('click', () => {
-        const popup = document.getElementById('main-popup');
-        popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
-      });
+        // Canvas Galaxy tối ưu
+        const canvas = document.getElementById('galaxy');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        let starColor = '#d0d0ff';
+        let scrollOffset = 0;
+        let resizeTimeout;
 
-      // Tabs
-      document.getElementById('music-tab').addEventListener('click', () => {
-        document.getElementById('music-tab').classList.add('active');
-        document.getElementById('script-tab').classList.remove('active');
-        document.getElementById('music-content').classList.add('active');
-        document.getElementById('script-content-popup').classList.remove('active');
-      });
-      document.getElementById('script-tab').addEventListener('click', () => {
-        document.getElementById('script-tab').classList.add('active');
-        document.getElementById('music-tab').classList.remove('active');
-        document.getElementById('script-content-popup').classList.add('active');
-        document.getElementById('music-content').classList.remove('active');
-      });
+        function updateStarColor() {
+            starColor = document.body.getAttribute('data-theme') === 'light' ? "#777" : "#d0d0ff";
+        }
 
-      // Music player (giữ nguyên playlist và logic)
-      const audio = document.getElementById('audio-player');
-      const playPause = document.getElementById('play-pause-btn');
-      const next = document.getElementById('next-btn');
-      const prev = document.getElementById('prev-btn');
-      const titleEl = document.getElementById('current-song-title');
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            const count = window.innerWidth < 768 ? 80 : 120;
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2.2 + 0.4,
+                    speed: Math.random() * 0.5 + 0.08
+                });
+            }
+        }
 
-      const songs = [ /* giữ nguyên array songs từ code cũ */ 
-        { title: "Ảo Thuật Gia - J97", url: "https://cdn.jsdelivr.net/gh/QUYDEPTRAI499/Music-web@main/L%C3%A0o%20C%C3%B4ng%20T%E1%BB%AD%20Remix%20(L%C3%A0o%20G%C3%AC%20C%C5%A9ng%20T%C3%B4i)%20-%20JACK%20-%20J97%20x%20Ness%20Remix%20%E2%99%ABTrong%20L%E1%BB%9Bp%20Thanh%20Ni%C3%AAn%20Khu%20Nh%C3%A0%20Gi%C3%A0u%20-%20Ness%20Remix.mp3" },
-        { title: "Chỉ Là Anh Không Biết - Hồ Gia Khánh", url: "https://github.com/QUYDEPTRAI499/Music-web/raw/refs/heads/main/Ch%E1%BB%89%20L%C3%A0%20Anh%20Kh%C3%B4ng%20Bi%E1%BA%BFt%20(B%E1%BA%A3n%20Hot%20TikTok)%20-%20H%E1%BB%93%20Gia%20Kh%C3%A1nh%20x%20VuNhann%F0%9F%8E%BCEm%20N%C3%A0o%20%C4%90%C3%A2u%20Bi%E1%BA%BFt%20Bao%20Suy%20T%C6%B0%20Ch%E1%BA%A5t%20%C4%90%E1%BA%A7y%20-%20VuNhann%20Music.mp3" },
-        { title: "Nắng Dưới Chân Mây - Nguyễn Hữu Khoa", url: "https://cdn.jsdelivr.net/gh/QUYDEPTRAI499/Music-web@main/N%E1%BA%AFng%20D%C6%B0%E1%BB%9Bi%20Ch%C3%A2n%20M%C3%A2y%20(Style%20Huy%20PT%20Remix)%20-%20Nguy%E1%BB%85n%20H%E1%BB%AFu%20Kha%20%E2%99%AB%20Tr%E1%BA%A3%20L%E1%BA%A1i%20Em%20Nh%E1%BB%AFng%20N%E1%BB%97i%20Bu%E1%BB%93n%20Remix%20TikTok%20-%20Air%20Remix.mp3" },
-        { title: "Anh Vui - Phạm Kỳ", url: "https://github.com/QUYDEPTRAI499/Music-web/raw/refs/heads/main/Anh%20Vui%20-%20Ph%E1%BA%A1m%20K%E1%BB%B3%20(Duzme%20Remix)%20%20Anh%20Vui%20%C4%90%E1%BA%BFn%20N%E1%BB%97i%20Ngh%E1%BA%B9n%20Ng%C3%A0o...Remix%20Tik%20Tok%20-%20Duzme%20Music.mp3" }
-      ];
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = starColor;
+            stars.forEach(s => {
+                ctx.beginPath();
+                ctx.arc(s.x, s.y + scrollOffset * s.speed * 0.5, s.size, 0, Math.PI * 2);
+                ctx.fill();
+                s.y += s.speed;
+                if (s.y > canvas.height) s.y = -s.size;
+            });
+            requestAnimationFrame(animateStars);
+        }
 
-      let idx = 0;
-      function loadSong(i) {
-        audio.src = songs[i].url;
-        titleEl.textContent = songs[i].title;
-        audio.play().catch(()=>{});
-        playPause.textContent = '⏸';
-      }
-      playPause.onclick = () => {
-        if (audio.paused) { audio.play(); playPause.textContent = '⏸'; } 
-        else { audio.pause(); playPause.textContent = '▶'; }
-      };
-      next.onclick = () => { idx = (idx + 1) % songs.length; loadSong(idx); };
-      prev.onclick = () => { idx = (idx - 1 + songs.length) % songs.length; loadSong(idx); };
-      audio.onended = () => { idx = (idx + 1) % songs.length; loadSong(idx); };
-      loadSong(idx);
-    });
-  </script>
+        window.addEventListener('scroll', () => { scrollOffset = window.scrollY; });
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(initStars, 200);
+        });
+
+        // Init
+        renderExecutors(androidExecutors, 'android-grid');
+        renderExecutors(pcExecutors, 'pc-grid', true);
+        updateStarColor();
+        initStars();
+        animateStars();
+        loadLinks(true);
+        setInterval(() => loadLinks(true), 45000);
+    </script>
 </body>
 </html>

@@ -173,6 +173,17 @@
         @media (max-width: 768px) { .theme-toggle { top: 16px; right: 16px; padding: 10px 16px; } }
 
         #galaxy { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        
+        /* Admin Panel Button */
+        .admin-btn {
+            position: fixed; bottom: 24px; left: 24px; z-index: 1000;
+            background: linear-gradient(135deg, #ff3b5e, #ff9500);
+            border: none; border-radius: 999px; padding: 12px 24px;
+            color: white; font-weight: bold; cursor: pointer;
+            font-family: 'Orbitron'; box-shadow: 0 0 20px rgba(255,59,94,0.5);
+            transition: 0.3s; text-decoration: none; display: flex; align-items: center; gap: 8px;
+        }
+        .admin-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255,59,94,0.8); }
     </style>
 </head>
 <body data-theme="dark">
@@ -183,6 +194,11 @@
         <i class="fas fa-moon" id="theme-icon"></i>
         <span>Chế độ</span>
     </div>
+    
+    <!-- Nút mở Control Panel -->
+    <a href="admin_panel.html" target="_blank" class="admin-btn">
+        <i class="fas fa-crown"></i> CONTROL PANEL
+    </a>
 
     <canvas id="galaxy"></canvas>
 
@@ -287,13 +303,11 @@
 
             list.forEach(ex => {
                 const isFix = ex.isFix || false;
-                const badgeHTML = '';
                 
                 // Status Handling
                 let statusHTML = '';
                 if (isPc) {
                     statusHTML += `<div id="status-${ex.id}" class="mini-status status-offline">PC: Checking...</div>`;
-                    // Thêm status cho TNG Roblox nếu là TNG PC
                     if (ex.id === 'tng_pc') {
                         statusHTML += `<div id="status-tng_roblox" class="mini-status status-offline">ROBLOX TNG: Checking...</div>`;
                     }
@@ -308,7 +322,6 @@
                          <i class="${isFix ? 'fas fa-tools' : 'fas fa-desktop'}"></i> ${isFix ? 'Download Fix' : 'Download PC'}
                        </a>`;
                      
-                     // Thêm nút Download Roblox cho TNG PC
                      if (ex.id === 'tng_pc') {
                          btnHTML += `<a href="#" class="download-btn" id="btn-tng_roblox" style="background: linear-gradient(135deg, #FF512F, #DD2476);">
                              <i class="fas fa-gamepad"></i> Roblox TNG
@@ -328,7 +341,6 @@
 
                 container.innerHTML += `
                     <div class="card ${isFix ? 'fix-card' : ''}" data-name="${ex.name.toLowerCase()}" data-id="${ex.id}">
-                        ${badgeHTML}
                         <div class="card-top">
                             <div class="card-icon">
                                 <img src="${ex.icon}" alt="${ex.name}" loading="lazy" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3039/3039403.png'">
@@ -347,14 +359,15 @@
             });
         }
 
-        // Load links
+        // Load links từ GitHub (file links.json của bạn)
         let isRefreshing = false;
         async function loadLinks(silent = false) {
             if (isRefreshing) return;
             isRefreshing = true;
 
             try {
-                const res = await fetch('https://raw.githubusercontent.com/HypatiaDz/111/main/links.json?t=' + Date.now());
+                // Dùng file links.json từ GitHub của bạn
+                const res = await fetch('https://raw.githubusercontent.com/QUYDEPTRAI499/ZENOX-EXECUTOR-STUDIO/main/links.json?t=' + Date.now());
                 if (!res.ok) throw new Error('Network response was not ok');
                 const data = await res.json();
 
@@ -383,7 +396,6 @@
                     update(ex.id, data[ex.id], ex.isFix ? 'Fix Tool' : 'PC');
                 });
                 
-                // Cập nhật riêng cho nút Roblox TNG
                 update('tng_roblox', data['tng_roblox'], 'ROBLOX TNG');
 
                 const time = new Date().toLocaleString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'});
@@ -411,7 +423,7 @@
             }, 300);
         });
 
-        // Right click copy + maintenance click
+        // Right click copy
         document.addEventListener('contextmenu', e => {
             const btn = e.target.closest('.download-btn');
             if (btn && btn.href && btn.href.startsWith('http')) {
@@ -428,7 +440,7 @@
             }
         });
 
-        // Canvas Galaxy tối ưu
+        // Canvas Galaxy
         const canvas = document.getElementById('galaxy');
         const ctx = canvas.getContext('2d');
         let stars = [];

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="description" content="ZENOX STUDIO EXECUTOR - Quản lý Executor Roblox Android & PC chuyên nghiệp, link luôn cập nhật mới nhất."/>
+    <meta name="description" content="ZENOX STUDIO EXECUTOR - Quản lý Executor Roblox Android, iOS, External, macOS chuyên nghiệp"/>
     <meta name="theme-color" content="#050505"/>
     <title>ZENOX STUDIO EXECUTOR - Quản lý Executor Chuyên Nghiệp</title>
     
@@ -23,7 +23,6 @@
             --status-offline: #ff5555;
             --fix-color: #ff9500;
             --glow: 0 0 35px rgba(88, 101, 242, 0.55);
-            --glow-accent: 0 0 35px rgba(0, 212, 255, 0.45);
             --toast-bg-success: linear-gradient(135deg, #00c896, #00ff9d);
             --toast-bg-error: linear-gradient(135deg, #ff5555, #ff3366);
             --shadow: 0 10px 30px rgba(0,0,0,0.6);
@@ -41,7 +40,6 @@
             --status-offline: #e63946;
             --fix-color: #ffaa00;
             --glow: 0 0 25px rgba(76, 85, 217, 0.35);
-            --glow-accent: 0 0 25px rgba(0, 153, 204, 0.35);
             --shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
@@ -115,12 +113,6 @@
         }
         .card:hover { transform: translateY(-14px) scale(1.02); border-color: var(--accent); box-shadow: 0 24px 60px rgba(0,0,0,0.45), var(--glow); }
 
-        .badge-container { position: absolute; top: 14px; left: 14px; display: flex; flex-wrap: wrap; gap: 8px; z-index: 6; }
-        .badge { padding: 5px 12px; border-radius: 50px; font-size: 0.74rem; font-weight: 700; color: white; box-shadow: 0 3px 10px rgba(0,0,0,0.5); }
-
-        .fix-card { border-color: var(--fix-color); background: rgba(255,149,0,0.08); }
-        .fix-card:hover { box-shadow: 0 0 30px rgba(255,149,0,0.45); }
-
         .card-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
         .card-icon { width: 68px; height: 68px; border-radius: 16px; overflow: hidden; border: 1px solid var(--card-border); }
         .card-icon img { width: 100%; height: 100%; object-fit: cover; }
@@ -172,9 +164,6 @@
         }
         @media (max-width: 768px) { .theme-toggle { top: 16px; right: 16px; padding: 10px 16px; } }
 
-        #galaxy { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        
-        /* Admin Panel Button */
         .admin-btn {
             position: fixed; bottom: 24px; left: 24px; z-index: 1000;
             background: linear-gradient(135deg, #ff3b5e, #ff9500);
@@ -184,57 +173,74 @@
             transition: 0.3s; text-decoration: none; display: flex; align-items: center; gap: 8px;
         }
         .admin-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255,59,94,0.8); }
+
+        #galaxy { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
     </style>
 </head>
 <body data-theme="dark">
 
     <div id="toast-container"></div>
 
-    <div class="theme-toggle" onclick="toggleTheme()" aria-label="Chuyển chế độ sáng/tối">
+    <div class="theme-toggle" onclick="toggleTheme()">
         <i class="fas fa-moon" id="theme-icon"></i>
         <span>Chế độ</span>
     </div>
-    
-    <!-- Nút mở Control Panel -->
-    <a href="https://cdn.discordapp.com/attachments/1329426349034836031/1486946290846797835/qr-anime-1773012639018.jpg?ex=69c75a25&is=69c608a5&hm=e78457e7900ba0dec08baeb1fa6e4891e728dd4ccb586e46828d93c73c7ab194&" target="_blank" class="admin-btn">
-        <i class="fas fa-crown"></i> DONATE
+
+    <a href="admin_panel.html" target="_blank" class="admin-btn">
+        <i class="fas fa-crown"></i> CONTROL PANEL
     </a>
 
     <canvas id="galaxy"></canvas>
 
     <header class="header">
         <h1>ZENOX STUDIO</h1>
-        <p>Hệ thống Executor Android & PC Đầy Đủ - Update liên tục</p>
+        <p>Hệ thống Executor Android, iOS, External, macOS Đầy Đủ - Update liên tục</p>
     </header>
 
     <div class="container">
         <div class="search-container">
             <i class="fas fa-search search-icon"></i>
-            <input type="text" id="searchInput" class="search-input" placeholder="Tìm executor (ví dụ: arceus, delta, salo...)" aria-label="Tìm kiếm executor">
+            <input type="text" id="searchInput" class="search-input" placeholder="Tìm executor (ví dụ: arceus, delta, xeno...)" aria-label="Tìm kiếm executor">
         </div>
 
         <button id="refresh-all" class="refresh-btn" onclick="loadLinks(false)">
             <i class="fas fa-sync-alt"></i> Refresh All Links
         </button>
 
+        <!-- ANDROID SECTION -->
         <div class="section-header">
             <h2><i class="fab fa-android"></i> Android Executors</h2>
             <div class="last-update" id="android-update">Đang tải...</div>
         </div>
         <div class="grid" id="android-grid"></div>
 
+        <!-- IOS SECTION (trái táo) -->
         <div class="section-header">
-            <h2><i class="fas fa-desktop"></i> PC Executors</h2>
-            <div class="last-update" id="pc-update">Đang tải...</div>
+            <h2><i class="fab fa-apple"></i> iOS Executors</h2>
+            <div class="last-update" id="ios-update">Đang tải...</div>
         </div>
-        <div class="grid" id="pc-grid"></div>
+        <div class="grid" id="ios-grid"></div>
+
+        <!-- EXTERNAL SECTION (màn hình PC) -->
+        <div class="section-header">
+            <h2><i class="fas fa-desktop"></i> External Executors</h2>
+            <div class="last-update" id="external-update">Đang tải...</div>
+        </div>
+        <div class="grid" id="external-grid"></div>
+
+        <!-- MACOS SECTION (laptop) -->
+        <div class="section-header">
+            <h2><i class="fas fa-laptop"></i> macOS Executors</h2>
+            <div class="last-update" id="macos-update">Đang tải...</div>
+        </div>
+        <div class="grid" id="macos-grid"></div>
 
         <div class="support-section">
             <h2 style="margin-bottom: 20px; color: var(--primary);">Cần hỗ trợ hoặc báo lỗi?</h2>
             <p style="margin-bottom: 30px; color: var(--text-secondary);">
                 Tham gia server Discord chính thức để được hỗ trợ nhanh, cập nhật link mới nhất và trao đổi với cộng đồng!
             </p>
-            <a href="https://discord.gg/DB7qNjkc7F" target="_blank" class="join-discord-btn" aria-label="Tham gia Discord">
+            <a href="https://discord.gg/DB7qNjkc7F" target="_blank" class="join-discord-btn">
                 <i class="fab fa-discord" style="font-size:1.5rem;"></i>
                 Tham gia Discord ngay
             </a>
@@ -274,7 +280,8 @@
             $('#theme-icon').className = savedTheme === 'light' ? 'fas fa-sun' : 'fas fa-moon';
         }
 
-        // Data
+        // ========== DANH SÁCH EXECUTOR ==========
+        // Android Executors
         const androidExecutors = [
             { id: 'arceus', name: 'Arceus X NEO', ver: '2.703', icon: 'https://sf-static.upanhlaylink.com/img/image_2025091341b69c6afa4e02709bf1ba299bdbafbd.jpg', types: ['qt', 'vng'] },
             { id: 'codex',   name: 'Codex',       ver: '2.703', icon: 'https://executors-lion-hub.netlify.app/codex.png', types: ['qt', 'vng'] },
@@ -286,51 +293,49 @@
             { id: 'cryptic', name: 'Cryptic',     ver: '2.704', icon: 'https://getcryptic.net/logo.png', types: ['qt', 'vng'] },
         ];
 
-        const pcExecutors = [
-            { id: 'xeno',        name: 'Xeno PC',         icon: 'https://www.xeno.onl/images/xeno.png' },
-            { id: 'bunni',       name: 'Bunni Xeno',      icon: 'https://sf-static.upanhlaylink.com/img/image_20251107ec93fb41bcff1cb31ece2f29c4c3d623.jpg' },
-            { id: 'ronix_pc',    name: 'Ronix PC',        icon: 'https://wearedevs.net/images/ronix/ronix-animated.gif' },
-            { id: 'onyx',        name: 'Onyx PC',         icon: 'https://cdn-icons-png.flaticon.com/512/11546/11546303.png' },
-            { id: 'tng_pc',      name: 'TNG PC',          icon: 'https://cdn-icons-png.flaticon.com/512/2620/2620701.png' },
-            { id: 'velocity_pc', name: 'Velocity PC',     icon: 'https://files.catbox.moe/tj6brv.png' },
-            { id: 'salo_pc',     name: 'Salo Client PC',  icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968292.png' },
+        // iOS Executors (logo trái táo)
+        const iosExecutors = [
+            { id: 'ios_delta',  name: 'Delta iOS',    ver: '2.704', icon: 'https://sf-static.upanhlaylink.com/img/image_2025091320b780aa4e49c945bdddf569984a41b6.jpg' },
         ];
 
-        // Render
-        function renderExecutors(list, containerId, isPc = false) {
+        // External Executors (màn hình PC - thay thế PC cũ)
+        const externalExecutors = [
+            { id: 'xeno',        name: 'Xeno External',     icon: 'https://www.xeno.onl/images/xeno.png' },
+            { id: 'bunni',       name: 'Bunni Xeno',        icon: 'https://sf-static.upanhlaylink.com/img/image_20251107ec93fb41bcff1cb31ece2f29c4c3d623.jpg' },
+            { id: 'ronix_ext',   name: 'Ronix External',    icon: 'https://wearedevs.net/images/ronix/ronix-animated.gif' },
+            { id: 'onyx',        name: 'Onyx External',     icon: 'https://cdn-icons-png.flaticon.com/512/11546/11546303.png' },
+            { id: 'tng_ext',     name: 'TNG External',      icon: 'https://cdn-icons-png.flaticon.com/512/2620/2620701.png' },
+            { id: 'velocity_ext',name: 'Velocity External', icon: 'https://files.catbox.moe/tj6brv.png' },
+            { id: 'salo_ext',    name: 'Salo External',     icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968292.png' },
+        ];
+
+        // macOS Executors (logo laptop)
+        const macOSExecutors = [
+            { id: 'mac_ronix',    name: 'Ronix macOS',   icon: 'https://wearedevs.net/images/ronix/ronix-animated.gif' },
+        ];
+
+        // Render function
+        function renderExecutors(list, containerId, typeName, isSingleType = true) {
             const container = $(`#${containerId}`);
+            if (!container) return;
             container.innerHTML = '';
 
             list.forEach(ex => {
-                const isFix = ex.isFix || false;
-                
-                // Status Handling
                 let statusHTML = '';
-                if (isPc) {
-                    statusHTML += `<div id="status-${ex.id}" class="mini-status status-offline">PC: Checking...</div>`;
-                    if (ex.id === 'tng_pc') {
-                        statusHTML += `<div id="status-tng_roblox" class="mini-status status-offline">ROBLOX TNG: Checking...</div>`;
-                    }
-                } else {
-                    statusHTML = ex.types.map(t => `<div id="status-${ex.id}-${t}" class="mini-status status-offline">${t.toUpperCase()}: Checking...</div>`).join('');
-                }
-
-                // Button Handling
                 let btnHTML = '';
-                if (isPc) {
-                     btnHTML += `<a href="#" class="download-btn ${isFix ? 'fix-btn' : ''}" id="btn-${ex.id}">
-                         <i class="${isFix ? 'fas fa-tools' : 'fas fa-desktop'}"></i> ${isFix ? 'Download Fix' : 'Download PC'}
-                       </a>`;
-                     
-                     if (ex.id === 'tng_pc') {
-                         btnHTML += `<a href="#" class="download-btn" id="btn-tng_roblox" style="background: linear-gradient(135deg, #FF512F, #DD2476);">
-                             <i class="fas fa-gamepad"></i> Roblox TNG
-                         </a>`;
-                     }
+                
+                if (isSingleType) {
+                    // iOS, External, macOS (chỉ 1 loại)
+                    statusHTML = `<div id="status-${ex.id}" class="mini-status status-offline">${typeName}: Checking...</div>`;
+                    btnHTML = `<a href="#" class="download-btn" id="btn-${ex.id}">
+                        <i class="fas fa-download"></i> Download ${typeName}
+                    </a>`;
                 } else {
+                    // Android (có nhiều loại qt/vng)
+                    statusHTML = ex.types.map(t => `<div id="status-${ex.id}-${t}" class="mini-status status-offline">${t.toUpperCase()}: Checking...</div>`).join('');
                     btnHTML = ex.types.map(t => `
                         <a href="#" class="download-btn" id="btn-${ex.id}-${t}">
-                          <i class="fas fa-download"></i> ${t.toUpperCase()}
+                            <i class="fas fa-download"></i> ${t.toUpperCase()}
                         </a>
                     `).join('');
                 }
@@ -340,7 +345,7 @@
                 </a>`;
 
                 container.innerHTML += `
-                    <div class="card ${isFix ? 'fix-card' : ''}" data-name="${ex.name.toLowerCase()}" data-id="${ex.id}">
+                    <div class="card" data-name="${ex.name.toLowerCase()}" data-id="${ex.id}">
                         <div class="card-top">
                             <div class="card-icon">
                                 <img src="${ex.icon}" alt="${ex.name}" loading="lazy" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3039/3039403.png'">
@@ -359,14 +364,13 @@
             });
         }
 
-        // Load links từ GitHub (file links.json của bạn)
+        // Load links từ GitHub
         let isRefreshing = false;
         async function loadLinks(silent = false) {
             if (isRefreshing) return;
             isRefreshing = true;
 
             try {
-                // Dùng file links.json từ GitHub của bạn
                 const res = await fetch('https://raw.githubusercontent.com/QUYDEPTRAI499/ZENOX-EXECUTOR-STUDIO/main/links.json?t=' + Date.now());
                 if (!res.ok) throw new Error('Network response was not ok');
                 const data = await res.json();
@@ -388,19 +392,31 @@
                     }
                 };
 
+                // Android (có qt/vng)
                 androidExecutors.forEach(ex => {
                     ex.types.forEach(t => update(`${ex.id}-${t}`, data[`${ex.id}_${t}`], t.toUpperCase()));
                 });
 
-                pcExecutors.forEach(ex => {
-                    update(ex.id, data[ex.id], ex.isFix ? 'Fix Tool' : 'PC');
+                // iOS
+                iosExecutors.forEach(ex => {
+                    update(ex.id, data[ex.id], 'iOS');
                 });
-                
-                update('tng_roblox', data['tng_roblox'], 'ROBLOX TNG');
+
+                // External
+                externalExecutors.forEach(ex => {
+                    update(ex.id, data[ex.id], 'External');
+                });
+
+                // macOS
+                macOSExecutors.forEach(ex => {
+                    update(ex.id, data[ex.id], 'macOS');
+                });
 
                 const time = new Date().toLocaleString('vi-VN', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'});
                 $('#android-update').textContent = `Cập nhật: ${time}`;
-                $('#pc-update').textContent = `Cập nhật: ${time}`;
+                $('#ios-update').textContent = `Cập nhật: ${time}`;
+                $('#external-update').textContent = `Cập nhật: ${time}`;
+                $('#macos-update').textContent = `Cập nhật: ${time}`;
 
                 if (!silent) showToast("Cập nhật link thành công!", "success");
             } catch (err) {
@@ -411,7 +427,7 @@
             }
         }
 
-        // Search với debounce
+        // Search
         let searchTimeout;
         $('#searchInput').addEventListener('input', e => {
             clearTimeout(searchTimeout);
@@ -487,8 +503,11 @@
         });
 
         // Init
-        renderExecutors(androidExecutors, 'android-grid');
-        renderExecutors(pcExecutors, 'pc-grid', true);
+        renderExecutors(androidExecutors, 'android-grid', '', false);
+        renderExecutors(iosExecutors, 'ios-grid', 'iOS', true);
+        renderExecutors(externalExecutors, 'external-grid', 'External', true);
+        renderExecutors(macOSExecutors, 'macos-grid', 'macOS', true);
+        
         updateStarColor();
         initStars();
         animateStars();
